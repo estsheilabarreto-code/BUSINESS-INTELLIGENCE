@@ -1,0 +1,6 @@
+{
+  "name": "Observatorio de Seguridad y Salud Laboral de Bogotá",
+  "description": "Dashboard de Business Intelligence para el análisis, seguimiento y prevención de accidentalidad, enfermedad y mortalidad laboral en Bogotá D. C. basado en datos oficiales abiertos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
