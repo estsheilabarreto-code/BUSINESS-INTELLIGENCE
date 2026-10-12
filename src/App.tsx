@@ -3,14 +3,17 @@ import {
   LaborRecord,
   ResourceMetadata,
   FilterState,
+  GeminiSecondOpinionResponse,
 } from './types/data';
 import { fetchLaborData, DataSourceMode, CKAN_DATASTORE_URL } from './services/api';
+import { requestSecondOpinion } from './services/geminiService';
 import { computeKpiMetrics, generateFindings } from './utils/calculations';
 import { Header } from './components/Header';
 import { Filters } from './components/Filters';
 import { KpiCards } from './components/KpiCards';
 import { ChartsSection } from './components/ChartsSection';
 import { FindingsAlerts } from './components/FindingsAlerts';
+import { GeminiSecondOpinionModal } from './components/GeminiSecondOpinionModal';
 import { DataTable } from './components/DataTable';
 import { AboutDataModal } from './components/AboutDataModal';
 import { LoadingState } from './components/LoadingState';
@@ -26,6 +29,12 @@ export default function App() {
   const [sourceMode, setSourceMode] = useState<DataSourceMode>('CSV_FULL');
   const [datastoreNotes, setDatastoreNotes] = useState<string>('');
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
+
+  // Estado para la Segunda Opinión de Gemini
+  const [isSecondOpinionOpen, setIsSecondOpinionOpen] = useState<boolean>(false);
+  const [isSecondOpinionLoading, setIsSecondOpinionLoading] = useState<boolean>(false);
+  const [secondOpinionError, setSecondOpinionError] = useState<string | null>(null);
+  const [secondOpinionData, setSecondOpinionData] = useState<GeminiSecondOpinionResponse | null>(null);
 
   // Estado de los filtros
   const [filters, setFilters] = useState<FilterState>({
@@ -133,6 +142,22 @@ export default function App() {
       indicatorType: 'ALL',
       searchTerm: '',
     });
+  };
+
+  // Manejador para solicitar una segunda opinión a Gemini
+  const handleRequestSecondOpinion = async () => {
+    setIsSecondOpinionOpen(true);
+    setIsSecondOpinionLoading(true);
+    setSecondOpinionError(null);
+    try {
+      const result = await requestSecondOpinion(filters, kpiMetrics, findings, records);
+      setSecondOpinionData(result);
+    } catch (err: any) {
+      console.error('Error al pedir segunda opinión a Gemini:', err);
+      setSecondOpinionError(err.message || 'No fue posible obtener la segunda opinión de Gemini.');
+    } finally {
+      setIsSecondOpinionLoading(false);
+    }
   };
 
   return (
@@ -256,6 +281,8 @@ export default function App() {
             <FindingsAlerts
               findings={findings}
               selectedYear={filters.selectedYear}
+              onRequestSecondOpinion={handleRequestSecondOpinion}
+              isSecondOpinionLoading={isSecondOpinionLoading}
             />
 
             {/* Tabla Detallada con Búsqueda, Ordenamiento y Exportación CSV */}
@@ -282,7 +309,7 @@ export default function App() {
           <div className="flex items-center gap-4 text-[11px]">
             <button
               onClick={() => setIsAboutOpen(true)}
-              className="text-slate-300 hover:text-white transition-colors"
+              className="text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
               Ficha metodológica
             </button>
@@ -306,6 +333,18 @@ export default function App() {
         onClose={() => setIsAboutOpen(false)}
         metadata={metadata}
         datastoreNotes={datastoreNotes}
+      />
+
+      {/* 6. Modal de Segunda Opinión Analítica de Gemini */}
+      <GeminiSecondOpinionModal
+        isOpen={isSecondOpinionOpen}
+        onClose={() => setIsSecondOpinionOpen(false)}
+        isLoading={isSecondOpinionLoading}
+        error={secondOpinionError}
+        opinion={secondOpinionData}
+        onRetry={handleRequestSecondOpinion}
+        selectedYear={filters.selectedYear}
+        selectedSector={filters.selectedSector}
       />
     </div>
   );

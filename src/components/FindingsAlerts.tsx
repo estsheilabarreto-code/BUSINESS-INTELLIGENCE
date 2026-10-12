@@ -8,17 +8,22 @@ import {
   ArrowUpRight,
   TrendingDown,
   Info,
+  Sparkles,
 } from 'lucide-react';
 import { Finding } from '../types/data';
 
 interface FindingsAlertsProps {
   findings: Finding[];
   selectedYear: string;
+  onRequestSecondOpinion?: () => void;
+  isSecondOpinionLoading?: boolean;
 }
 
 export const FindingsAlerts: React.FC<FindingsAlertsProps> = ({
   findings,
   selectedYear,
+  onRequestSecondOpinion,
+  isSecondOpinionLoading = false,
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-5 mb-8">
@@ -38,11 +43,22 @@ export const FindingsAlerts: React.FC<FindingsAlertsProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
             <Info className="w-3.5 h-3.5 text-blue-500" />
             Criterios basados en datos observados
           </span>
+
+          {onRequestSecondOpinion && (
+            <button
+              onClick={onRequestSecondOpinion}
+              disabled={isSecondOpinionLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
+              <span>Pedir una segunda opinión a Gemini</span>
+            </button>
+          )}
         </div>
       </div>
 

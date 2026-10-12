@@ -115,3 +115,17 @@ export interface Finding {
   criterion: string;
   recommendation: string;
 }
+
+export interface GeminiSecondOpinionResponse {
+  hallazgoIdentificado: string;
+  accionPropuesta: string;
+  datosQueRespaldan: string[];
+  justificacion: string;
+  resultadoEsperado: string;
+  limitaciones: string;
+  metadata?: {
+    analyzedYear: string;
+    analyzedSector: string;
+    timestamp: string;
+  };
+}
